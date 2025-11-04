@@ -1,0 +1,19 @@
+name: CI bench_spsc
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test-bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure & Build (Release)
+        run: |
+          cmake -S . -B build -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j
+      - name: Run unit tests
+        run: ctest --test-dir build --output-on-failure
+      - name: Run micro-bench (quick)
+        run: ./build/bench_spsc
