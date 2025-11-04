@@ -6,7 +6,7 @@
 #include <random>
 #include <numeric>
 
-using clock_t = std::chrono::high_resolution_clock;
+using Clock = std::chrono::high_resolution_clock;
 
 struct Args {
     size_t capacity = 1u << 20; // 1M
@@ -34,7 +34,7 @@ int main() {
     lat_samples.reserve(20000); // échantillonnage
     const int sample_every = 200;
 
-    auto t0 = clock_t::now();
+    auto t0 = Clock::now();
 
     std::thread prod([&]{
         for (int i = 1; i <= a.messages; ++i) {
@@ -47,12 +47,12 @@ int main() {
     std::thread cons([&]{
         int local = 0;
         while (local < a.messages) {
-            auto ts = clock_t::now();
+            auto ts = Clock::now();
             auto v = rb.try_pop();
             if (v) {
                 ++local;
                 if ((local % sample_every) == 0) {
-                    auto te = clock_t::now();
+                    auto te = Clock::now();
                     std::chrono::duration<double, std::micro> us = te - ts;
                     lat_samples.push_back(us.count());
                 }
@@ -63,7 +63,7 @@ int main() {
 
     prod.join();
     cons.join();
-    auto t1 = clock_t::now();
+    auto t1 = Clock::now();
     std::chrono::duration<double> sec = t1 - t0;
 
     double throughput = a.messages / sec.count();
