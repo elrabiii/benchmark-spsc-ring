@@ -9,19 +9,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Flags de perf/repro
-if (NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
   add_compile_options(-Wall -Wextra -Wpedantic -Wconversion)
-  if (CMAKE_BUILD_TYPE STREQUAL "Release")
+
+  if(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_options(-O3 -DNDEBUG)
   endif()
 endif()
 
-if (ENABLE_ASAN AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+if(ENABLE_ASAN AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     add_compile_options(-fsanitize=address,undefined)
     add_link_options(-fsanitize=address,undefined)
   endif()
@@ -37,7 +38,7 @@ add_executable(bench_spsc bench/bench_main.cpp)
 target_link_libraries(bench_spsc PRIVATE ring_buffer)
 
 # Tests (GoogleTest via FetchContent)
-if (BUILD_TESTS)
+if(BUILD_TESTS)
   include(FetchContent)
   FetchContent_Declare(
     googletest
@@ -48,5 +49,8 @@ if (BUILD_TESTS)
   enable_testing()
   add_executable(unit_tests tests/test_ring_buffer.cpp)
   target_link_libraries(unit_tests PRIVATE ring_buffer gtest_main)
-  add_test(NAME unit_tests COMMAND unit_tests)
+
+  # add_test(NAME unit_tests COMMAND unit_tests)
+  include(GoogleTest)
+  gtest_discover_tests(unit_tests)
 endif()
